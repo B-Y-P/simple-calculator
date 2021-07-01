@@ -183,7 +183,9 @@ void ConsumePeeked(tokenizer *Tokenizer, token Peeked){
 }
 
 expr_node* AddNode(op Op, expr_node *A=0, expr_node *B=0, double Value=0.0){
-    return &(*(expr_node *)malloc(sizeof(expr_node)) = {Op, Value, A, B});
+    expr_node *Node = (expr_node *)malloc(sizeof(expr_node));
+    *Node = {Op, Value, A, B};
+    return Node;
 }
 void FreeExprNode(expr_node *Node){
     if(Node){
