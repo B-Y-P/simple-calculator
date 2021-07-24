@@ -2,6 +2,8 @@
 #include <string.h>
 #include "test.h"
 
+#define Max(a,b) ((a) < (b) ? (b) : (a))
+
 int main(int argc, char **argv){
     char line[512];
     if(argc > 1 && strcmp(argv[1], "test") == 0){
@@ -11,12 +13,8 @@ int main(int argc, char **argv){
         printf(">>> ");
         gets_s(line, sizeof(line));
         if(strcmp(line, "exit") == 0){ break; }
-        double Ans = BeginParse(line);
-        if(!isnan(Ans)){
-            int Casted = Ans;
-            (Ans - Casted == 0.0) ? printf(" %d \n", Casted) : printf(" %f \n", Ans);
-        }
-        else{ printf("Invalid Expression\n"); }
+        double Ans = ParseString(line);
+        !isnan(Ans) ? printf(" %g \n", Ans) : printf("Invalid Expression\n");
     }
     return 0;
 }

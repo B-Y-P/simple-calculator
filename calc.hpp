@@ -6,6 +6,7 @@
 #define Assert(cond) if(!(cond)){ printf("Assertion fired\n"); (*(int *)0) = 0; }
 
 #define INF INFINITY
+#define MIN 6.1232339957367660e-17
 
 #define  PI64 3.14159265358979323846
 #define TAU64 6.28318530717958647692
@@ -223,7 +224,7 @@ expr_node* ParseAtom(tokenizer *Tokenizer){
         default:{ return 0; }
     }
 
-    if(IsStartAtom(PeekToken(Tokenizer))){
+    if(!IsWhiteSpace(Tokenizer->At[0]) && IsStartAtom(PeekToken(Tokenizer))){
         Node = AddNode(MUL, Node, ParseAtom(Tokenizer));   // Implicit multiplication
     }
     if(Node && Node->Type != CON){
@@ -242,7 +243,7 @@ expr_node* ParseExpression(tokenizer *Tokenizer, token_type EndTokenType, expr_n
         if(Token.Type == EndTokenType){ break; }
 
         int Precedence1 = OpPrec(Token);
-        if(Precedence1 < 0){ FreeExprNode(A); return 0; }
+        if(!Precedence1){ FreeExprNode(A); return 0; }
 
         expr_node *B = ParseAtom(Tokenizer);
         if(B == nullptr){ FreeExprNode(A); return 0; }
@@ -254,7 +255,7 @@ expr_node* ParseExpression(tokenizer *Tokenizer, token_type EndTokenType, expr_n
         }
 
         int Precendence2 = OpPrec(NextToken);
-        if(Precendence2 < 0){ FreeExprNode(A); FreeExprNode(B); return 0; }
+        if(!Precendence2){ FreeExprNode(A); FreeExprNode(B); return 0; }
 
         if(Precedence1 < Precendence2 || (Token.Type == NextToken.Type && IsRight(Token))){
             B = ParseExpression(Tokenizer, EndTokenType, B);
@@ -266,7 +267,7 @@ expr_node* ParseExpression(tokenizer *Tokenizer, token_type EndTokenType, expr_n
     return A;
 }
 
-double BeginParse(const char *Expression){
+double ParseString(const char *Expression){
     tokenizer Tokenizer = {Expression};
     token Token = PeekToken(&Tokenizer);
     if(Token.Type == Token_EndOfStream){ return 0.0; }
@@ -278,6 +279,7 @@ double BeginParse(const char *Expression){
         FreeExprNode(Node);
         if(isnan(PrevAns)){ PrevAns = 0.0; return NAN; }
         if(isinf(PrevAns)){ PrevAns = 0.0; return INF; }
+        if(fabs(PrevAns) <= MIN){ PrevAns = 0.0; }
         return PrevAns;
     }
     PrevAns = 0.0;

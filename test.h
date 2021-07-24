@@ -18,15 +18,15 @@ bool test(test_case *Cases, int Count){
         printf(">>> \"%s\" ", Case->Expression);
 
         bool ExpectNAN = isnan(Case->Expected);
-        if(!ExpectNAN){ printf("= %f\n", Case->Expected); }
+        if(!ExpectNAN){ printf("= %g\n", Case->Expected); }
 
         int Offset = (!ExpectNAN)*(strlen(Case->Expression) + 5);
-        double Ans = BeginParse(Case->Expression);
+        double Ans = ParseString(Case->Expression);
 
         bool CasePasses;
         if(!isnan(Ans)){
             CasePasses = ((isinf(Case->Expected) && isinf(Ans)) ||  (fabs(Ans - Case->Expected) < 0.000001));
-            printf("Ans:%*c%f", Offset, ' ', Ans);
+            printf("Ans:%*c%g", Offset, ' ', Ans);
         }else{
             CasePasses = ExpectNAN;
             printf("\nInvalid Expression");
@@ -53,6 +53,9 @@ int test_cases(bool DoNegativeTests){
         {"e",               2.718282,   "Euler's Constant"},
         {"TAU",             6.283185,    0},
         {"2PI",             6.283185,   "Implicit Multiplication"},
+        {"2(15)",           30,         0},
+        {"2 (15)",          NAN,        "White-space disallows implicit multiplication"},
+        {"2 8",             NAN,        0},
         {"(3+2)(5-1)",      20,         0},
         {"cos(PI/2)",       0.0,        "Trig expressions"},
         {"tan(PI/4.0)",     1.0,        0},
@@ -76,9 +79,8 @@ int test_cases(bool DoNegativeTests){
         {"2 + ",            NAN,        0},
         {"ANS",             0.0,        "ANS after Invalid Expression becomes 0"},
         {"2 + (",           NAN,        0},
-        {"-2",              -2,         "Unary minus of first atom of expression becomes negation when previous expression was invalid"},
         {")",               NAN,        0},
-        {"3 1 +",           NAN,        "RPN is cringe"},
+        {"3 1 +",           NAN,        "RPN is not valid"},
     };
     int Skip = 1;
     Assert(Skip > 0);
